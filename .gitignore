@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+tfm/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Models
+outputs/models/*.keras
+
+# Logs
+outputs/logs/
+
+# Raw data
+data/raw/
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

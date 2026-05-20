@@ -1,0 +1,7 @@
+{
+    "model_name": "improved_cnn",
+    "accuracy": 0.7759,
+    "precision_macro": 0.7891940577567087,
+    "recall_macro": 0.7758999999999999,
+    "f1_macro": 0.7706784628893374
+}

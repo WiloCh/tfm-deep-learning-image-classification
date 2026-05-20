@@ -1,0 +1,7 @@
+{
+    "model_name": "transfer_model",
+    "accuracy": 0.8788,
+    "precision_macro": 0.8787753028879663,
+    "recall_macro": 0.8788,
+    "f1_macro": 0.8785316845235205
+}
