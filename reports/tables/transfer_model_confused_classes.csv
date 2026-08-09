@@ -1,0 +1,11 @@
+﻿clase_real,clase_predicha,errores,posible_causa
+dog,cat,147,Rasgos visuales similares entre animales domesticos y fondos poco distintivos.
+cat,dog,61,Rasgos visuales similares entre animales domesticos y posturas parecidas.
+bird,deer,56,"Baja resolucion de CIFAR-10, variacion de pose, iluminacion o fondo poco discriminativo."
+ship,airplane,50,Fondos amplios y objetos pequenos con bajo detalle en 32x32 pixeles.
+deer,horse,44,Animales cuadrupedos con forma corporal y fondos naturales similares.
+cat,deer,42,"Baja resolucion de CIFAR-10, variacion de pose, iluminacion o fondo poco discriminativo."
+truck,automobile,42,"Vehiculos terrestres con colores, encuadres y fondos de carretera similares."
+automobile,truck,42,Vehiculos terrestres con ruedas y vistas frontales o laterales similares.
+bird,cat,39,"Baja resolucion de CIFAR-10, variacion de pose, iluminacion o fondo poco discriminativo."
+cat,frog,39,"Baja resolucion de CIFAR-10, variacion de pose, iluminacion o fondo poco discriminativo."

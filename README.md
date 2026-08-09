@@ -183,6 +183,16 @@ python generate_eda_figures.py
 
 ---
 
+# Generación de evidencias de evaluación
+
+```bash
+python generate_evaluation_evidence.py
+```
+
+Genera evidencias complementarias de evaluación: matriz de confusión, ejemplos mal clasificados y clases más confundidas del modelo `transfer_model_best.keras`.
+
+---
+
 # Tecnologías utilizadas
 
 - Python
