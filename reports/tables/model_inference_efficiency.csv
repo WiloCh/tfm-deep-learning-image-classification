@@ -1,0 +1,4 @@
+model_name,model_size_bytes,model_size_mib,mean_inference_seconds,std_inference_seconds,mean_ms_per_image,images_per_second,test_samples,batch_size,device,total_params,trainable_params,non_trainable_params
+baseline_cnn,4327007,4.1266,1.308261,0.079585,0.130826,7643.7339,10000,64,CPU,356810,356810,0
+improved_cnn,9915067,9.4557,3.338726,0.101487,0.333873,2995.1545,10000,64,CPU,816938,815530,1408
+transfer_model,11614226,11.0762,29.226179,0.471583,2.922618,342.159,10000,64,CPU,2423242,165258,2257984
