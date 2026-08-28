@@ -15,6 +15,8 @@ from src.evaluation.error_analysis import (
     save_misclassified_report,
     plot_misclassified_samples,
 )
+from src.evaluation.transfer_evidence import evaluate_transfer_checkpoint
+from src.config import MODELS_DIR
 
 
 def get_model(model_name: str):
@@ -59,6 +61,34 @@ def main(model_name: str):
 
     print("Guardando gráficas de entrenamiento...")
     plot_training_history(history, model_name)
+
+    if model_name == "transfer_model":
+        checkpoint_path = MODELS_DIR / "transfer_model_best.keras"
+        print("Evaluando checkpoint oficial de transfer_model...")
+        result = evaluate_transfer_checkpoint(checkpoint_path=checkpoint_path)
+        validation = result["validation"]
+
+        print("Validacion final transfer_model:")
+        print(f"Test samples: {validation['test_samples']}")
+        print(f"Correct predictions: {validation['correct_predictions']}")
+        print(f"Incorrect predictions: {validation['incorrect_predictions']}")
+        print(f"Accuracy metrics.json: {validation['accuracy_metrics_json']:.4f}")
+        print(f"Accuracy desde y_pred: {validation['accuracy_from_predictions']:.4f}")
+        print(f"Accuracy desde matriz: {validation['accuracy_from_confusion_matrix']:.4f}")
+        print(f"Precision macro: {validation['precision_macro']:.4f}")
+        print(f"Recall macro: {validation['recall_macro']:.4f}")
+        print(f"F1 macro: {validation['f1_macro']:.4f}")
+        print(f"Filas CSV errores: {validation['misclassified_csv_rows']}")
+        print(f"Suma matriz confusion: {validation['confusion_matrix_total']}")
+        print(f"Checkpoint utilizado: {validation['checkpoint_used']}")
+        print(
+            "Epoca checkpoint: "
+            f"{validation['checkpoint_epoch_one_based']} "
+            f"(monitor={validation['checkpoint_monitor']}, "
+            f"mode={validation['checkpoint_mode']})"
+        )
+        print("Proceso finalizado correctamente.")
+        return
 
     print("Evaluando modelo en conjunto de prueba...")
     y_pred = model.predict(x_test_p)

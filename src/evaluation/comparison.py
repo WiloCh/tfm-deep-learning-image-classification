@@ -33,6 +33,14 @@ def build_comparison_table():
     df_comparison = pd.DataFrame(metrics_list)
 
     if not df_comparison.empty:
+        metrics_columns = [
+            "model_name",
+            "accuracy",
+            "precision_macro",
+            "recall_macro",
+            "f1_macro",
+        ]
+        df_comparison = df_comparison[metrics_columns]
         df_comparison = df_comparison.sort_values(
             by="f1_macro",
             ascending=False

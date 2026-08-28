@@ -1,25 +1,32 @@
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
 
 # Virtual environments
+.venv/
 venv/
-tfm/
+.env
 
 # Jupyter
 .ipynb_checkpoints/
 
+# IDE
+.idea/
+.vscode/
+
 # Models
 outputs/models/*.keras
 
-# Logs
-outputs/logs/
+# Backups and interrupted runs
+outputs/backup_transfer_previous/
+
+# Temporary/debug logs
+outputs/logs/*.out.log
+outputs/logs/*.err.log
+outputs/logs/transfer_model_clean_run_*.log
 
 # Raw data
 data/raw/
-
-# VS Code
-.vscode/
 
 # OS
 .DS_Store

@@ -1,7 +1,18 @@
 {
+    "model": "transfer_model",
     "model_name": "transfer_model",
-    "accuracy": 0.8788,
-    "precision_macro": 0.8787753028879663,
-    "recall_macro": 0.8788,
-    "f1_macro": 0.8785316845235205
+    "checkpoint_used": "C:\\Users\\William Chugchilan\\OneDrive\\Documentos\\TFM\\Codigo\\tfm-image-classification\\outputs\\models\\transfer_model_best.keras",
+    "random_seed": 42,
+    "test_samples": 10000,
+    "accuracy": 0.8777,
+    "precision_macro": 0.8795346791981082,
+    "recall_macro": 0.8776999999999999,
+    "f1_macro": 0.8776124650630898,
+    "correct_predictions": 8777,
+    "incorrect_predictions": 1223,
+    "checkpoint_epoch_zero_based": 16,
+    "checkpoint_epoch_one_based": 17,
+    "checkpoint_val_accuracy": 0.8853999972343445,
+    "checkpoint_monitor": "val_accuracy",
+    "checkpoint_mode": "max"
 }
