@@ -5,12 +5,18 @@ import tensorflow as tf
 from src.config import CLASS_NAMES, FIGURES_DIR
 
 
-def find_last_conv_layer(model: tf.keras.Model) -> str:
+def find_last_conv_layer(model: tf.keras.Model) -> tuple[str | None, str]:
     for layer in reversed(model.layers):
         if isinstance(layer, tf.keras.layers.Conv2D):
-            return layer.name
+            return None, layer.name
 
-    raise ValueError("No se encontró una capa Conv2D en el modelo.")
+    for layer in reversed(model.layers):
+        if isinstance(layer, tf.keras.Model):
+            for nested_layer in reversed(layer.layers):
+                if isinstance(nested_layer, tf.keras.layers.Conv2D):
+                    return layer.name, nested_layer.name
+
+    raise ValueError("No se encontro una capa Conv2D en el modelo.")
 
 
 def apply_layer(layer, x):
@@ -20,7 +26,7 @@ def apply_layer(layer, x):
         return layer(x)
 
 
-def make_gradcam_heatmap(image, model, last_conv_layer_name: str, pred_index=None):
+def build_top_level_grad_model(model, last_conv_layer_name: str):
     last_conv_layer = model.get_layer(last_conv_layer_name)
     last_conv_index = model.layers.index(last_conv_layer)
 
@@ -29,17 +35,67 @@ def make_gradcam_heatmap(image, model, last_conv_layer_name: str, pred_index=Non
         outputs=last_conv_layer.output,
     )
 
-    classifier_layers = model.layers[last_conv_index + 1:]
+    image_input = model.inputs[0]
+    conv_outputs = feature_extractor(image_input)
+
+    x = conv_outputs
+    for layer in model.layers[last_conv_index + 1:]:
+        x = apply_layer(layer, x)
+
+    return tf.keras.Model(model.inputs, [conv_outputs, x])
+
+
+def build_nested_grad_model(
+    model,
+    nested_model_name: str,
+    last_conv_layer_name: str,
+):
+    nested_model = model.get_layer(nested_model_name)
+    nested_index = model.layers.index(nested_model)
+    conv_layer = nested_model.get_layer(last_conv_layer_name)
+
+    nested_feature_extractor = tf.keras.Model(
+        inputs=nested_model.inputs,
+        outputs=[conv_layer.output, nested_model.output],
+    )
+
+    image_input = model.inputs[0]
+    x = image_input
+
+    for layer in model.layers[1:nested_index]:
+        x = apply_layer(layer, x)
+
+    # Reproduce the preprocessing needed to reach the nested internal conv layer.
+    if nested_model.name.startswith("mobilenetv2"):
+        x = tf.keras.applications.mobilenet_v2.preprocess_input(x * 255.0)
+
+    conv_outputs, x = nested_feature_extractor(x, training=False)
+
+    for layer in model.layers[nested_index + 1:]:
+        x = apply_layer(layer, x)
+
+    return tf.keras.Model(model.inputs, [conv_outputs, x])
+
+
+def make_gradcam_heatmap(
+    image,
+    model,
+    last_conv_layer_name: str,
+    pred_index=None,
+    nested_model_name: str | None = None,
+):
+    if nested_model_name is None:
+        grad_model = build_top_level_grad_model(model, last_conv_layer_name)
+    else:
+        grad_model = build_nested_grad_model(
+            model,
+            nested_model_name,
+            last_conv_layer_name,
+        )
 
     with tf.GradientTape() as tape:
-        conv_outputs = feature_extractor(image)
+        conv_outputs, predictions = grad_model(image)
         tape.watch(conv_outputs)
-
-        x = conv_outputs
-        for layer in classifier_layers:
-            x = apply_layer(layer, x)
-
-        predictions = x
 
         if pred_index is None:
             pred_index = tf.argmax(predictions[0])
@@ -83,6 +139,31 @@ def overlay_heatmap(image, heatmap, alpha=0.4):
     return superimposed_img
 
 
+def get_gradcam_overlay(
+    model,
+    image,
+    pred_index=None,
+    nested_model_name: str | None = None,
+    last_conv_layer_name: str | None = None,
+):
+    if last_conv_layer_name is None:
+        nested_model_name, last_conv_layer_name = find_last_conv_layer(model)
+
+    input_image = np.expand_dims(image, axis=0)
+
+    heatmap, predictions = make_gradcam_heatmap(
+        input_image,
+        model,
+        last_conv_layer_name,
+        pred_index=pred_index,
+        nested_model_name=nested_model_name,
+    )
+
+    overlay = overlay_heatmap(image, heatmap)
+
+    return heatmap, overlay, predictions, nested_model_name, last_conv_layer_name
+
+
 def generate_gradcam_example(
     model,
     image,
@@ -93,20 +174,13 @@ def generate_gradcam_example(
     output_dir = FIGURES_DIR / "gradcam"
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    last_conv_layer_name = find_last_conv_layer(model)
-
-    input_image = np.expand_dims(image, axis=0)
-
-    heatmap, predictions = make_gradcam_heatmap(
-        input_image,
+    _, overlay, predictions, _, _ = get_gradcam_overlay(
         model,
-        last_conv_layer_name,
+        image,
     )
 
     pred_label = int(np.argmax(predictions[0]))
     confidence = float(np.max(predictions[0]))
-
-    overlay = overlay_heatmap(image, heatmap)
 
     plt.figure(figsize=(8, 4))
 
